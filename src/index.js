@@ -2,6 +2,7 @@ import cheerio from 'cheerio';
 import fetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';
+import urlParser from 'url';
 
 const visited = {};
 const URL = "http://stevescooking.blogspot.com/";
@@ -39,9 +40,9 @@ const fetchHTML = async ({ url }) => {
         })
     })
 
-    console.log("image", imageUrls);
+    const { host } = urlParser.parse(url);
     
-    links.forEach((link) => {
+    links.filter((link) => link.includes(host)).forEach((link) => {
         fetchHTML({
             url: getValidLink(link)
         })
