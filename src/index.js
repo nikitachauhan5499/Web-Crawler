@@ -1,8 +1,10 @@
 import cheerio from 'cheerio';
 import fetch from 'node-fetch';
+import fs from 'fs';
+import path from 'path';
 
 const visited = {};
-const URL = "https://www.amazon.in";
+const URL = "http://stevescooking.blogspot.com/";
 
 const getValidLink = (link) => {
     if(link.includes('http'))
@@ -24,13 +26,26 @@ const fetchHTML = async ({ url }) => {
     const links = $('a').map((i, link) => 
         link.attribs.href
     ).get();
+
+    const imageUrls = $('img').map((i, link) => 
+        link.attribs.src
+    ).get();
+
+    imageUrls.forEach((imageUrl) => {
+        fetch(getValidLink(imageUrl)).then((response) => {
+            const filename = path.basename(imageUrl);
+            const dest = fs.createWriteStream(`images/${filename}`);
+            response.body.pipe(dest);
+        })
+    })
+
+    console.log("image", imageUrls);
     
     links.forEach((link) => {
         fetchHTML({
             url: getValidLink(link)
         })
     })
-    console.log(links);
 }
 
 fetchHTML({
